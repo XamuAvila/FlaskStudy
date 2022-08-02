@@ -1,4 +1,4 @@
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
 
 hotels = [
     {
@@ -38,7 +38,22 @@ class Hotel(Resource):
         return {'message': 'Hotel not found'}, 404
 
     def post(self, hotel_id):
-        pass
+        args = reqparse.RequestParser()
+        args.add_argument('nome')
+        args.add_argument('estrelas')
+        args.add_argument('diaria')
+        args.add_argument('cidade')
+        data = args.parse_args()
+        novo_hotel = {
+            'hotel_id': hotel_id,
+            'nome': data['nome'],
+            'estrelas': data['estrelas'],
+            'diaria': data['diaria'],
+            'cidade': data['cidade']
+        }
+
+        hotels.append(novo_hotel)
+        return novo_hotel, 200
     def put(self, hotel_id):
         pass
 
