@@ -31,31 +31,48 @@ class Hotels(Resource):
 
 
 class Hotel(Resource):
+
+    args = reqparse.RequestParser()
+    args.add_argument('nome')
+    args.add_argument('estrelas')
+    args.add_argument('diaria')
+    args.add_argument('cidade')
+
     def get(self, hotel_id):
-        for hotel in hotels:
-            if (hotel['hotel_id'] == hotel_id):
-                return hotel
+        hotel = Hotel.findHotel(hotel_id)
+        if hotel is not None:
+            return hotel
         return {'message': 'Hotel not found'}, 404
 
     def post(self, hotel_id):
-        args = reqparse.RequestParser()
-        args.add_argument('nome')
-        args.add_argument('estrelas')
-        args.add_argument('diaria')
-        args.add_argument('cidade')
-        data = args.parse_args()
+        data = Hotel.args.parse_args()
         novo_hotel = {
-            'hotel_id': hotel_id,
-            'nome': data['nome'],
-            'estrelas': data['estrelas'],
-            'diaria': data['diaria'],
-            'cidade': data['cidade']
+            'hotel_id': hotel_id, **data
         }
 
         hotels.append(novo_hotel)
         return novo_hotel, 200
+
     def put(self, hotel_id):
-        pass
+        hotel = Hotel.findHotel(hotel_id)
+        data = Hotel.args.parse_args()
+        novo_hotel = {
+            'hotel_id': hotel_id, **data
+        }
+        if hotel is not None:
+            hotel.update(novo_hotel)
+            return novo_hotel, 200
+
+        hotels.append(novo_hotel)
+        return novo_hotel, 201
+
 
     def delete(self, hotel_id):
         pass
+
+    def findHotel(hotel_id):
+        for hotel in hotels:
+            if (hotel['hotel_id'] == hotel_id):
+                return hotel
+        return None
+
