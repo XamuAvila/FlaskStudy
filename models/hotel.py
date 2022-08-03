@@ -1,16 +1,35 @@
-class HotelModel:
-    def __init__(self, hotel_id, nome, estrelas, diaria, cidade):
+from sql_alchemy import database
+
+
+class HotelModel(database.Model):
+    __tablename__ = 'hotels'
+    hotel_id = database.Column(database.String, primary_key=True)
+    name = database.Column(database.String(80))
+    stars = database.Column(database.Float(precision=1))
+    diary = database.Column(database.Float(precision=2))
+    city = database.Column(database.String(80))
+    def __init__(self, hotel_id, name, stars, diary, city):
         self.hotel_id = hotel_id
-        self.nome = nome
-        self.estrelas = estrelas
-        self.diaria = diaria
-        self.cidade = cidade
+        self.name = name
+        self.stars = stars
+        self.diary = diary
+        self.city = city
 
     def json(self):
         return {
             'hotel_id': self.hotel_id,
-            'nome': self.nome,
-            'estrelas': self.estrelas,
-            'diaria': self.diaria,
-            'cidade': self.cidade
+            'name': self.name,
+            'stars': self.stars,
+            'diary': self.diary,
+            'city': self.city
         }
+    @classmethod
+    def find_hotel(cls, hotel_id):
+        hotel = cls.query.filter_by(hotel_id=hotel_id)
+        if hotel:
+            return hotel
+        return None
+
+    def save_hotel(self):
+        database.session.add(self)
+        database.session.commit()

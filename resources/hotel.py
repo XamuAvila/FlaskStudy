@@ -3,24 +3,24 @@ from models.hotel import HotelModel
 hotels = [
     {
         'hotel_id': 'alpha',
-        'nome': 'Alpha Hotel',
-        'estrelas': 4.3,
-        'diaria': 420.34,
-        'cidade': 'Rio'
+        'name': 'Alpha Hotel',
+        'stars': 4.3,
+        'diary': 420.34,
+        'city': 'Rio'
     },
     {
         'hotel_id': 'Xamu',
-        'nome': 'Xamu Hotel',
-        'estrelas': 4.3,
-        'diaria': 420.34,
-        'cidade': 'Rio'
+        'name': 'Xamu Hotel',
+        'stars': 4.3,
+        'diary': 420.34,
+        'city': 'Rio'
     },
     {
         'hotel_id': 'Yas',
-        'nome': 'Yas Hotel',
-        'estrelas': 4.3,
-        'diaria': 420.34,
-        'cidade': 'Rio'
+        'name': 'Yas Hotel',
+        'stars': 4.3,
+        'diary': 420.34,
+        'city': 'Rio'
     },
 ]
 
@@ -37,16 +37,21 @@ class Hotel(Resource):
     args.add_argument('cidade')
 
     def get(self, hotel_id):
-        hotel = Hotel.findHotel(hotel_id)
-        if hotel is not None:
+        hotel = HotelModel.find_hotel(hotel_id)
+        if hotel:
             return hotel
-        return {'message': 'Hotel not found'}, 404
+        else:
+            return {'message': 'Hotel not found'}, 404
 
     def post(self, hotel_id):
+        hotel = HotelModel.find_hotel(hotel_id)
+        if hotel:
+            return {'message': 'Hotel "{}" already exists'.format(hotel_id)}
+
         data = Hotel.args.parse_args()
-        novo_hotel = HotelModel(hotel_id, **data).json()
-        hotels.append(novo_hotel)
-        return novo_hotel, 200
+        novo_hotel = HotelModel(hotel_id, **data)
+        novo_hotel.save_hotel()
+        return novo_hotel.json(), 200
 
     def put(self, hotel_id):
         hotel = Hotel.findHotel(hotel_id)
@@ -63,9 +68,3 @@ class Hotel(Resource):
         global hotels
         hotels = [hotel for hotel in hotels if hotel['hotel_id'] != hotel_id]
         return {'message': 'Hotel Deleted'}
-
-    def findHotel(hotel_id):
-        for hotel in hotels:
-            if (hotel['hotel_id'] == hotel_id):
-                return hotel
-        return None
