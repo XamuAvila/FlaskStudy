@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-
+from models.hotel import HotelModel
 hotels = [
     {
         'hotel_id': 'alpha',
@@ -24,14 +24,12 @@ hotels = [
     },
 ]
 
-
 class Hotels(Resource):
     def get(self):
         return {'hoteis': hotels}
 
 
 class Hotel(Resource):
-
     args = reqparse.RequestParser()
     args.add_argument('nome')
     args.add_argument('estrelas')
@@ -46,19 +44,14 @@ class Hotel(Resource):
 
     def post(self, hotel_id):
         data = Hotel.args.parse_args()
-        novo_hotel = {
-            'hotel_id': hotel_id, **data
-        }
-
+        novo_hotel = HotelModel(hotel_id, **data).json()
         hotels.append(novo_hotel)
         return novo_hotel, 200
 
     def put(self, hotel_id):
         hotel = Hotel.findHotel(hotel_id)
         data = Hotel.args.parse_args()
-        novo_hotel = {
-            'hotel_id': hotel_id, **data
-        }
+        novo_hotel = HotelModel(hotel_id, **data).json()
         if hotel is not None:
             hotel.update(novo_hotel)
             return novo_hotel, 200
@@ -66,13 +59,13 @@ class Hotel(Resource):
         hotels.append(novo_hotel)
         return novo_hotel, 201
 
-
     def delete(self, hotel_id):
-        pass
+        global hotels
+        hotels = [hotel for hotel in hotels if hotel['hotel_id'] != hotel_id]
+        return {'message': 'Hotel Deleted'}
 
     def findHotel(hotel_id):
         for hotel in hotels:
             if (hotel['hotel_id'] == hotel_id):
                 return hotel
         return None
-
